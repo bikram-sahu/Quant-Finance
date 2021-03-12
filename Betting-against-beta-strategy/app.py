@@ -181,4 +181,4 @@ nifty50 = [CAGR(nifty_return), volatility(nifty_return), sharpe(nifty_return, 0.
 lowbeta= [CAGR(portfolio_return), volatility(portfolio_return), sharpe(portfolio_return, 0.0625), portfolio_return["ret"].std(), max_dd(portfolio_return)]
 kpis = ["CAGR", "Volatility", "Sharpe ratio", "Std. deviation", "Max Drawdown"]
 KPIs = pd.DataFrame( list(zip(nifty50, lowbeta)), index= kpis, columns=["Nifty50", "Low Beta Portfolio"])
-st.table(KPIs)
+st.sidebar.table(KPIs)
