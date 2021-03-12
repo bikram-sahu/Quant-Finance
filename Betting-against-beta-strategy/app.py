@@ -7,10 +7,23 @@ import copy
 
 import streamlit as st
 
+st.markdown("""
+# Betting against beta
+
+**AIM:** To make case for a defensive (also called betting-against-beta at times) stock strategy.
+
+**INSTRUCTION:**
+
+1. Using python and the data (NIFTY constituents, and their prices for the past 11 years) attached, generate monthly portfolios of top 10 stocks as per the defensive factor ranking logic, and compute the PNL.
+
+2. Use a maximum of 12 months of lookback, so that you can have PNL performance for full 10 years. Show the performance stats you feel make sense.
+
+3. Assume cash holding. Assume zero costs. Assume slippage free execution at closing price. So in effect all you need are spot prices which we have shared.
+""")
 st.sidebar.title("Low Beta Anomaly")
-n_stocks = st.sidebar.number_input('Number of low beta stocks in Portfolio?', 10)
-startyear = st.sidebar.selectbox('Start year', [2011,2012,2013,2014, 2015, 2016, 2017, 2018, 2019, 2020])
-startingmonth = st.sidebar.selectbox('Start month', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+n_stocks = st.sidebar.number_input('Number of least beta stocks in Portfolio?', 10)
+startyear = st.sidebar.selectbox('Select start year', [2011,2012,2013,2014, 2015, 2016, 2017, 2018, 2019, 2020])
+startingmonth = st.sidebar.selectbox('Select start month', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
 start_month = (startyear - 2011)*12 + (startingmonth -1)
 # Load data
 nifty_constituents = pd.read_csv("nifty_constituents.csv", index_col = 'date')
