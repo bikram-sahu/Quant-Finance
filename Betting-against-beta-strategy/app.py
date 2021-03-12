@@ -18,13 +18,18 @@ st.markdown("""
 
 2. Use a maximum of 12 months of lookback, so that you can have PNL performance for full 10 years. Show the performance stats you feel make sense.
 
-3. Assume cash holding. Assume zero costs. Assume slippage free execution at closing price. So in effect all you need are spot prices which we have shared.
+3. Assume cash holding. Assume zero costs. Assume slippage free execution at closing price.
+
+## Results:
 """)
+
+st.markdown("*Expand the plots for better visualization.*")
 st.sidebar.title("Low Beta Anomaly")
 n_stocks = st.sidebar.number_input('Number of least beta stocks in Portfolio?', 10)
 startyear = st.sidebar.selectbox('Select start year', [2011,2012,2013,2014, 2015, 2016, 2017, 2018, 2019, 2020])
 startingmonth = st.sidebar.selectbox('Select start month', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
 start_month = (startyear - 2011)*12 + (startingmonth -1)
+
 # Load data
 nifty_constituents = pd.read_csv("nifty_constituents.csv", index_col = 'date')
 nifty_constituents_prices = pd.read_csv("nifty_constituents_prices.csv", index_col= 'date')
@@ -198,3 +203,4 @@ lowbeta= [CAGR(portfolio_return), volatility(portfolio_return), sharpe(portfolio
 kpis = ["CAGR", "Volatility", "Sharpe ratio", "Std. deviation", "Max Drawdown"]
 KPIs = pd.DataFrame( list(zip(nifty50, lowbeta)), index= kpis, columns=["Nifty50", "Low Beta Portfolio"])
 st.sidebar.table(KPIs)
+
