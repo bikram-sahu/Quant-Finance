@@ -9,6 +9,9 @@ import streamlit as st
 
 st.sidebar.title("Low Beta Anomaly")
 n_stocks = st.sidebar.number_input('Number of low beta stocks in Portfolio?', 10)
+startyear = st.sidebar.selectbox('Start year', [2011,2012,2013,2014, 2015, 2016, 2017, 2018, 2019, 2020])
+startingmonth = st.sidebar.selectbox('Start month', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+start_month = (startyear - 2011)*12 + (startingmonth -1)
 # Load data
 nifty_constituents = pd.read_csv("nifty_constituents.csv", index_col = 'date')
 nifty_constituents_prices = pd.read_csv("nifty_constituents_prices.csv", index_col= 'date')
@@ -58,12 +61,12 @@ def daily_return_for_the_month(portfolio, month_start, month_end):
     return monthly_returns
 
 def CAGR(df):
-    CAGR = (df["cum return"].tolist()[-1])**(1/10) - 1
+    CAGR = (df["cum return"].tolist()[-1])**(1/((120-start_month)/12)) - 1
     return CAGR
 
 def volatility(DF):
     df = DF.copy()
-    vol = df["ret"].std() * np.sqrt(len(df)/10)
+    vol = df["ret"].std() * np.sqrt(len(df)/((120-start_month)/12))
     return vol
 
 def sharpe(DF,rf):
@@ -82,7 +85,7 @@ def max_dd(DF):
     return max_dd
 
 portfolio_return = pd.DataFrame()
-for i in range(0,120,1):
+for i in range(start_month,120,1):
     month_start = month_start_dates[i]
     month_end = month_end_dates[i]
     portfolio = top10_low_beta_stocks(month_start)
@@ -92,7 +95,7 @@ for i in range(0,120,1):
 portfolio_return = portfolio_return
 portfolio_return["cum return"] = (portfolio_return["ret"] +1).cumprod()
 
-nifty_return = nifty_50_data.ret.loc[month_start_dates[0]:].to_frame()
+nifty_return = nifty_50_data.ret.loc[month_start_dates[start_month]:].to_frame()
 nifty_return = nifty_return
 nifty_return["cum return"] = (nifty_return["ret"] +1).cumprod()
 
@@ -106,7 +109,7 @@ daily_returns = daily_returns * nifty_constituents
 
 EWI = daily_returns.sum(axis=1).div(50)
 EWI = EWI.to_frame(name = 'ret')
-EWI = EWI.loc[datetime.datetime(2011,1,3):]
+EWI = EWI.loc[month_start_dates[start_month]:]
 
 EWI["cum return"] = (EWI["ret"] +1).cumprod()
 
