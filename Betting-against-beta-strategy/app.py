@@ -73,8 +73,12 @@ def top10_low_beta_stocks(on_date):
 
 def daily_return_for_the_month(portfolio, month_start, month_end):
     "function to calculate daily returns of a portfolio given a date range" 
-    monthly_returns = daily_returns.loc[month_start:month_end][portfolio]
-    monthly_returns["ret"] = monthly_returns.apply(np.mean, axis=1)
+    monthly_returns = daily_returns.loc[month_start:month_end][portfolio] +1
+    monthly_returns = monthly_returns.cumprod()
+    monthly_returns["temp"] = monthly_returns.apply(np.sum, axis=1)
+    monthly_returns.temp = monthly_returns.temp
+    monthly_returns["ret"] = (monthly_returns.temp - monthly_returns.temp.shift(1))/monthly_returns.temp.shift(1)
+    monthly_returns["ret"].iloc[0] = (monthly_returns["temp"].iloc[0] - 10)/10
     monthly_returns = monthly_returns[["ret"]]
     return monthly_returns
 
