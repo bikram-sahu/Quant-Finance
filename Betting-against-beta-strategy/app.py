@@ -30,6 +30,10 @@ startyear = st.sidebar.selectbox('Select start year', [2011,2012,2013,2014, 2015
 startingmonth = st.sidebar.selectbox('Select start month', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
 start_month = (startyear - 2011)*12 + (startingmonth -1)
 
+endyear = st.sidebar.selectbox('Select end year', [2011,2012,2013,2014, 2015, 2016, 2017, 2018, 2019, 2020])
+endingmonth = st.sidebar.selectbox('Select end month', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+end_month = (endyear - 2011)*12 + (endingmonth -1)
+
 # Load data
 nifty_constituents = pd.read_csv("nifty_constituents.csv", index_col = 'date')
 nifty_constituents_prices = pd.read_csv("nifty_constituents_prices.csv", index_col= 'date')
@@ -107,7 +111,7 @@ def max_dd(DF):
     return max_dd
 
 portfolio_return = pd.DataFrame()
-for i in range(start_month,120,1):
+for i in range(start_month,end_month,1):
     month_start = month_start_dates[i]
     month_end = month_end_dates[i]
     portfolio = top10_low_beta_stocks(month_start)
