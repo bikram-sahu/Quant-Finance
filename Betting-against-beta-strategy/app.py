@@ -87,12 +87,12 @@ def daily_return_for_the_month(portfolio, month_start, month_end):
     return monthly_returns
 
 def CAGR(df):
-    CAGR = (df["cum return"].tolist()[-1])**(1/((end_month-start_month)/12)) - 1
+    CAGR = (df["cum return"].tolist()[-1])**(1/((end_month-start_month + 1)/12)) - 1
     return CAGR
 
 def volatility(DF):
     df = DF.copy()
-    vol = df["ret"].std() * np.sqrt(len(df)/((end_month-start_month)/12))
+    vol = df["ret"].std() * np.sqrt(len(df)/((end_month-start_month + 1)/12))
     return vol
 
 def sharpe(DF,rf):
