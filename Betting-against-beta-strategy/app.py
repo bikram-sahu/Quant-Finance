@@ -25,7 +25,7 @@ st.markdown("""
 
 st.markdown("*Expand the plots for better visualization.*")
 st.sidebar.title("Low Beta Anomaly")
-n_stocks = st.sidebar.number_input('Number of least beta stocks in Portfolio?', 10)
+n_stocks = st.sidebar.number_input('Number of least beta stocks in Portfolio?', min_value = 1, max_value= 50, value = 10)
 startyear = st.sidebar.selectbox('Select start year', [2011,2012,2013,2014, 2015, 2016, 2017, 2018, 2019, 2020])
 startingmonth = st.sidebar.selectbox('Select start month', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
 start_month = (startyear - 2011)*12 + (startingmonth -1)
@@ -82,7 +82,7 @@ def daily_return_for_the_month(portfolio, month_start, month_end):
     monthly_returns["temp"] = monthly_returns.apply(np.sum, axis=1)
     monthly_returns.temp = monthly_returns.temp
     monthly_returns["ret"] = (monthly_returns.temp - monthly_returns.temp.shift(1))/monthly_returns.temp.shift(1)
-    monthly_returns["ret"].iloc[0] = (monthly_returns["temp"].iloc[0] - 10)/10
+    monthly_returns["ret"].iloc[0] = (monthly_returns["temp"].iloc[0] - n_stocks)/n_stocks
     monthly_returns = monthly_returns[["ret"]]
     return monthly_returns
 
