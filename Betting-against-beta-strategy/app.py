@@ -87,12 +87,12 @@ def daily_return_for_the_month(portfolio, month_start, month_end):
     return monthly_returns
 
 def CAGR(df):
-    CAGR = (df["cum return"].tolist()[-1])**(1/((120-start_month)/12)) - 1
+    CAGR = (df["cum return"].tolist()[-1])**(1/((end_month-start_month)/12)) - 1
     return CAGR
 
 def volatility(DF):
     df = DF.copy()
-    vol = df["ret"].std() * np.sqrt(len(df)/((120-start_month)/12))
+    vol = df["ret"].std() * np.sqrt(len(df)/((end_month-start_month)/12))
     return vol
 
 def sharpe(DF,rf):
@@ -121,7 +121,7 @@ for i in range(start_month,end_month,1):
 portfolio_return = portfolio_return
 portfolio_return["cum return"] = (portfolio_return["ret"] +1).cumprod()
 
-nifty_return = nifty_50_data.ret.loc[month_start_dates[start_month]:].to_frame()
+nifty_return = nifty_50_data.ret.loc[month_start_dates[start_month]:month_end_dates[end_month]].to_frame()
 nifty_return = nifty_return
 nifty_return["cum return"] = (nifty_return["ret"] +1).cumprod()
 
@@ -135,7 +135,7 @@ daily_returns = daily_returns * nifty_constituents
 
 EWI = daily_returns.sum(axis=1).div(50)
 EWI = EWI.to_frame(name = 'ret')
-EWI = EWI.loc[month_start_dates[start_month]:]
+EWI = EWI.loc[month_start_dates[start_month]:month_end_dates[end_month]]
 
 EWI["cum return"] = (EWI["ret"] +1).cumprod()
 
