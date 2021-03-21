@@ -30,18 +30,21 @@ startyear = st.sidebar.selectbox('Select start year', [2011,2012,2013,2014, 2015
 startingmonth = st.sidebar.selectbox('Select start month', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
 start_month = (startyear - 2011)*12 + (startingmonth -1)
 
-endyear = st.sidebar.selectbox('Select end year', [2011,2012,2013,2014, 2015, 2016, 2017, 2018, 2019, 2020])
-endingmonth = st.sidebar.selectbox('Select end month', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+endyear = st.sidebar.selectbox('Select end year', [2011,2012,2013,2014, 2015, 2016, 2017, 2018, 2019, 2020], index=9)
+endingmonth = st.sidebar.selectbox('Select end month', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], index=11)
 end_month = (endyear - 2011)*12 + (endingmonth - 1)
 
-# Load data
-nifty_constituents = pd.read_csv("nifty_constituents.csv", index_col = 'date')
-nifty_constituents_prices = pd.read_csv("nifty_constituents_prices.csv", index_col= 'date')
-nifty_50_data = pd.read_csv("NIFTY 50_Data.csv", index_col= 'Date')
+def load_data():
+    global nifty_constituents, nifty_constituents_prices, nifty_50_data
+    nifty_constituents = pd.read_csv("nifty_constituents.csv", index_col = 'date')
+    nifty_constituents_prices = pd.read_csv("nifty_constituents_prices.csv", index_col= 'date')
+    nifty_50_data = pd.read_csv("NIFTY 50_Data.csv", index_col= 'Date')
 
-nifty_constituents.index = pd.to_datetime(nifty_constituents.index)
-nifty_constituents_prices.index = pd.to_datetime(nifty_constituents_prices.index)
-nifty_50_data.index = pd.to_datetime(nifty_50_data.index)
+    nifty_constituents.index = pd.to_datetime(nifty_constituents.index)
+    nifty_constituents_prices.index = pd.to_datetime(nifty_constituents_prices.index)
+    nifty_50_data.index = pd.to_datetime(nifty_50_data.index) 
+
+load_data()
 
 # Daily returns of all the stocks
 daily_returns = nifty_constituents_prices.apply(lambda row: row.pct_change(), axis=0)
@@ -110,16 +113,24 @@ def max_dd(DF):
     max_dd = df["drawdown_pct"].max()
     return max_dd
 
-portfolio_return = pd.DataFrame()
-for i in range(start_month,end_month + 1,1):
-    month_start = month_start_dates[i]
-    month_end = month_end_dates[i]
-    portfolio = top10_low_beta_stocks(month_start)
-    portfolio_monthly_return = daily_return_for_the_month(portfolio, month_start, month_end)
-    portfolio_return = pd.concat([portfolio_return, portfolio_monthly_return])
+@st.cache
+def Complete_Portfolio_return(start_month=0, end_month=119):
+    portfolio_return = pd.DataFrame()
+    portfolio_stock_list = []
+    for i in range(start_month,end_month + 1,1):
+        month_start = month_start_dates[i]
+        month_end = month_end_dates[i]
+        portfolio = top10_low_beta_stocks(month_start)
+        portfolio_stock_list.append(portfolio)
+        portfolio_monthly_return = daily_return_for_the_month(portfolio, month_start, month_end)
+        portfolio_return = pd.concat([portfolio_return, portfolio_monthly_return])
+    return portfolio_stock_list, portfolio_return
 
-portfolio_return = portfolio_return
-portfolio_return["cum return"] = (portfolio_return["ret"] +1).cumprod()
+portfolio_stock_list, portfolio_return = Complete_Portfolio_return(start_month=0, end_month=119)
+
+portfolio_return_range = portfolio_return.loc[month_start_dates[start_month]: month_end_dates[end_month]]
+portfolio_return_range = copy.deepcopy(portfolio_return_range)
+portfolio_return_range["cum return"] = (portfolio_return_range["ret"] +1).cumprod()
 
 nifty_return = nifty_50_data.ret.loc[month_start_dates[start_month]:month_end_dates[end_month]].to_frame()
 nifty_return = nifty_return
@@ -140,7 +151,7 @@ EWI = EWI.loc[month_start_dates[start_month]:month_end_dates[end_month]]
 EWI["cum return"] = (EWI["ret"] +1).cumprod()
 
 fig2 = go.Figure()
-fig2.add_trace(go.Scatter(x= portfolio_return.index, y=portfolio_return["cum return"],
+fig2.add_trace(go.Scatter(x= portfolio_return_range.index, y=portfolio_return_range["cum return"],
                     mode='lines',
                     name='Low beta portfolio'))
 
@@ -169,7 +180,7 @@ fig1 = go.Figure()
 fig1.add_trace(go.Scatter(x= nifty_return.index, y= nifty_return["ret"],
                     mode='lines',
                     name='Nifty50'))
-fig1.add_trace(go.Scatter(x= portfolio_return.index, y= portfolio_return["ret"],
+fig1.add_trace(go.Scatter(x= portfolio_return_range.index, y= portfolio_return_range["ret"],
                     mode='lines',
                     name='Low beta Portfolio'))
 fig1.update_layout(xaxis_tickangle=-45,
@@ -177,7 +188,7 @@ fig1.update_layout(xaxis_tickangle=-45,
 
 st.plotly_chart(fig1)
 
-portfolio_yearly_returns = portfolio_return["ret"] + 1
+portfolio_yearly_returns = portfolio_return_range["ret"] + 1
 
 yearly_returns = nifty_return["ret"] + 1
 yearly_returns = yearly_returns.resample("Y").prod() -1
@@ -207,7 +218,7 @@ fig3.update_xaxes(
 st.plotly_chart(fig3)
 
 nifty50 = [CAGR(nifty_return), volatility(nifty_return), sharpe(nifty_return, 0.0625), nifty_return["ret"].std(), max_dd(nifty_return)]
-lowbeta= [CAGR(portfolio_return), volatility(portfolio_return), sharpe(portfolio_return, 0.0625), portfolio_return["ret"].std(), max_dd(portfolio_return)]
+lowbeta= [CAGR(portfolio_return_range), volatility(portfolio_return_range), sharpe(portfolio_return_range, 0.0625), portfolio_return_range["ret"].std(), max_dd(portfolio_return_range)]
 kpis = ["CAGR", "Volatility", "Sharpe ratio", "Std. deviation", "Max Drawdown"]
 KPIs = pd.DataFrame( list(zip(nifty50, lowbeta)), index= kpis, columns=["Nifty50", "Low Beta Portfolio"])
 st.sidebar.table(KPIs)
