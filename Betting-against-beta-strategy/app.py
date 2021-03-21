@@ -32,7 +32,7 @@ start_month = (startyear - 2011)*12 + (startingmonth -1)
 
 endyear = st.sidebar.selectbox('Select end year', [2011,2012,2013,2014, 2015, 2016, 2017, 2018, 2019, 2020])
 endingmonth = st.sidebar.selectbox('Select end month', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
-end_month = (endyear - 2011)*12 + (endingmonth)
+end_month = (endyear - 2011)*12 + (endingmonth - 1)
 
 # Load data
 nifty_constituents = pd.read_csv("nifty_constituents.csv", index_col = 'date')
