@@ -111,7 +111,7 @@ def max_dd(DF):
     return max_dd
 
 portfolio_return = pd.DataFrame()
-for i in range(start_month,end_month,1):
+for i in range(start_month,end_month + 1,1):
     month_start = month_start_dates[i]
     month_end = month_end_dates[i]
     portfolio = top10_low_beta_stocks(month_start)
